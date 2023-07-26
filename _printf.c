@@ -1,114 +1,79 @@
-#include <stdio.h>
 #include <stdarg.h>
 #include <unistd.h>
 
-#define BUFF_SIZE 1024
-
-void print_buffer(char buffer[], int *buff_ind);
-
-/* Helper function prototypes (definitions needed) */
-int get_flags(const char *format, int *index_ptr);
-int get_width(const char *format, int *index_ptr, va_list args);
-int get_precision(const char *format, int *index_ptr, va_list args);
-int get_size(const char *format, int *index_ptr);
-int handle_print(const char *format, int *index_ptr, va_list args, char buffer[], int flags, int width, int precision, int size);
+/**
+ * _putchar - Writes a character to stdout
+ * @c: The character to write
+ * Return: On success, 1. On error, -1.
+ */
+int _putchar(char c)
+{
+	return write(1, &c, 1);
+}
 
 /**
  * _printf - Printf function
- * @format: format.
- * Return: Printed chars.
+ * @format: Format string
+ * Return: The number of characters printed
  */
 int _printf(const char *format, ...)
 {
-    int i, printed = 0, printed_chars = 0;
-    int flags, width, precision, size, buff_ind = 0;
-    va_list list;
-    char buffer[BUFF_SIZE];
+	int count = 0;
+	va_list args;
+	char c;
+	char *str;
 
-    if (format == NULL)
-        return -1;
+	va_start(args, format);
 
-    va_start(list, format);
+	while (*format)
+	{
+		if (*format != '%')
+		{
+			_putchar(*format);
+			count++;
+		}
+		else
+		{
+			format++;
+			switch (*format)
+			{
+				case 'c':
+					c = va_arg(args, int);
+					_putchar(c);
+					count++;
+					break;
+				case 's':
+					str = va_arg(args, char *);
+					if (str)
+					{
+						while (*str)
+						{
+							_putchar(*str);
+							str++;
+							count++;
+						}
+					}
+					else
+					{
+						_putchar(' ');
+						count++;
+					}
+					break;
+				case '%':
+					_putchar('%');
+					count++;
+					break;
+				default:
+					_putchar('%');
+					_putchar(*format);
+					count += 2;
+					break;
+			}
+		}
+		format++;
+	}
 
-    for (i = 0; format && format[i] != '\0'; i++)
-    {
-        if (format[i] != '%')
-        {
-            buffer[buff_ind++] = format[i];
-            if (buff_ind == BUFF_SIZE)
-                print_buffer(buffer, &buff_ind);
-            printed_chars++;
-        }
-        else
-        {
-            print_buffer(buffer, &buff_ind);
-            flags = get_flags(format, &i);
-            width = get_width(format, &i, list);
-            precision = get_precision(format, &i, list);
-            size = get_size(format, &i);
-            ++i;
-            printed = handle_print(format, &i, list, buffer, flags, width, precision, size);
-            if (printed == -1)
-            {
-                va_end(list);
-                return -1;
-            }
-            printed_chars += printed;
-        }
-    }
-
-    print_buffer(buffer, &buff_ind);
-    va_end(list);
-    return printed_chars;
-}
-
-/**
- * print_buffer - Prints the contents of the buffer if it exists
- * @buffer: Array of chars
- * @buff_ind: Index at which to add next char, represents the length.
- */
-void print_buffer(char buffer[], int *buff_ind)
-{
-    if (*buff_ind > 0)
-        write(1, &buffer[0], *buff_ind);
-
-    *buff_ind = 0;
-}
-
-/* Implement the missing helper functions here */
-
-int get_flags(const char *format, int *index_ptr)
-{
-    /* Implement the logic to extract flags from the format string */
-    /* Update the index_ptr accordingly */
-    /* Return the flags */
-}
-
-int get_width(const char *format, int *index_ptr, va_list args)
-{
-    /* Implement the logic to extract width from the format string */
-    /* Update the index_ptr accordingly */
-    /* Return the width */
-}
-
-int get_precision(const char *format, int *index_ptr, va_list args)
-{
-    /* Implement the logic to extract precision from the format string */
-    /* Update the index_ptr accordingly */
-    /* Return the precision */
-}
-
-int get_size(const char *format, int *index_ptr)
-{
-    /* Implement the logic to extract size from the format string */
-    /* Update the index_ptr accordingly */
-    /* Return the size */
-}
-
-int handle_print(const char *format, int *index_ptr, va_list args, char buffer[], int flags, int width, int precision, int size)
-{
-    /* Implement the logic to handle printing based on the format specifier */
-    /* Update the index_ptr accordingly */
-    /* Return the number of characters printed */
+	va_end(args);
+	return count;
 }
 
